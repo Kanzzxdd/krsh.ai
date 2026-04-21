@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>krsh.ai | Kernel</title>
+    <title>krsh.ai | Private Root</title>
     <style>
         body { background-color: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; margin: 0; height: 100vh; overflow: hidden; }
         #terminal { width: 100%; height: 100%; overflow-y: auto; }
@@ -13,16 +13,17 @@
         .hidden { display: none; }
         #caret { width: 8px; height: 15px; background: #0f0; display: inline-block; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
+        .err { color: #ff0000; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="terminal">
-        <span class="line">KRSH_AI KERNEL v2.6.0_STABLE (ENCRYPTED)</span>
-        <span class="line">AUTHORIZED PERSONNEL ONLY.</span>
+        <span class="line">KRSH_AI PRIVATE KERNEL v2.6.0</span>
+        <span class="line">RESTRICTED ACCESS: ADMIN KANZA ONLY.</span>
         <span class="line">&nbsp;</span>
-        <span class="line">Enter Core Password:</span>
+        <span class="line">Please authenticate to open secure tunnel:</span>
         <div id="input-area">
-            <span style="margin-right: 10px;">root@krsh_ai:~#</span>
+            <span style="margin-right: 10px;">kanza@krsh_ai:~#</span>
             <input type="password" id="authKey" autofocus onkeydown="check(event)">
             <span id="caret"></span>
         </div>
@@ -30,52 +31,60 @@
     </div>
 
     <script>
-        /* Logika utama terminal Kanza */
         const logs = document.getElementById('logs');
         const inputArea = document.getElementById('input-area');
         const authKey = document.getElementById('authKey');
 
         function check(e) {
             if (e.key === 'Enter') {
-                run();
+                validate();
             }
         }
 
-        async function run() {
+        async function validate() {
             const secret = "Kz!@#99_X-Rsh.Ai";
-            if (authKey.value === secret) {
-                inputArea.classList.add('hidden');
-                await print("> Accessing core system...");
+            const val = authKey.value;
+            inputArea.classList.add('hidden');
+
+            if (val === secret) {
+                await print("> Synchronizing private keys...");
                 await sleep(1000);
-                await print("> [OK] Authentication successful.");
-                await sleep(500);
-                await startPrank();
+                await print("> [OK] Identity verified: Admin Kanza.");
+                await sleep(600);
+                await successSequence();
             } else {
-                alert("ACCESS DENIED");
+                await print("> [ERROR] ACCESS DENIED: Signature Mismatch.");
+                await sleep(800);
+                await print("> [CRITICAL]: Intruder alert triggered.", "err");
+                await print("> [SYSTEM]: Capturing network fingerprints...", "err");
+                await sleep(1500);
+                await print("> Connection terminated by server.", "err");
+                await sleep(2000);
                 location.reload();
             }
         }
 
-        async function print(text) {
+        async function print(text, className = "") {
             const l = document.createElement('span');
-            l.className = 'line';
+            l.className = 'line ' + className;
             l.textContent = text;
             logs.appendChild(l);
+            return new Promise(r => setTimeout(r, 50));
         }
 
         function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-        async function startPrank() {
+        async function successSequence() {
             const msg = [
                 "------------------------------------------",
-                "WELCOME, ADMIN KANZA",
+                "SYSTEM ONLINE - WELCOME HOME, BOSS.",
                 "------------------------------------------",
-                "> Server Status : Online",
-                "> AI Core       : Active",
-                "> Logs          : Video Injected Successfully",
-                "> Source        : Instagram Reels Decrypted",
+                "> Server Loc  : GitHub Pages (kanzzxdd)",
+                "> Encryption  : AES-256 Enabled",
+                "> AI Status   : Fully Operational",
                 "------------------------------------------",
-                "root@krsh_ai: Ready._"
+                "Ready for your commands...",
+                "kanza@krsh_ai_private:~$ _"
             ];
             for (let t of msg) {
                 const l = document.createElement('span');
@@ -83,7 +92,7 @@
                 logs.appendChild(l);
                 for (let c of t) {
                     l.textContent += c;
-                    await sleep(30);
+                    await sleep(25);
                 }
             }
         }

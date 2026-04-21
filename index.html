@@ -3,150 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>krsh.ai | Root Terminal</title>
+    <title>krsh.ai | Kernel</title>
     <style>
         body { background-color: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; margin: 0; height: 100vh; overflow: hidden; }
         #terminal { width: 100%; height: 100%; overflow-y: auto; }
-        .output-line { display: flex; align-items: center; margin-bottom: 5px; white-space: pre-wrap; }
-        #input-line { display: flex; align-items: center; }
-        #authKey { background: transparent; border: none; color: #0f0; font-family: inherit; font-size: inherit; outline: none; flex-grow: 1; }
-        #caret { display: inline-block; width: 8px; height: 15px; background-color: #0f0; animation: blink 1s infinite; }
+        .line { display: block; margin-bottom: 5px; white-space: pre-wrap; }
+        #input-area { display: flex; align-items: center; }
+        input { background: transparent; border: none; color: #0f0; font-family: inherit; font-size: inherit; outline: none; flex-grow: 1; }
+        .hidden { display: none; }
+        #caret { width: 8px; height: 15px; background: #0f0; display: inline-block; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <div id="terminal">
-        <div class="output-line">KRSH_AI KERNEL v2.6.0_STABLE (ENCRYPTED)</div>
-        <div class="output-line">AUTHORIZED PERSONNEL ONLY.</div>
-        <div class="output-line">&nbsp;</div>
-        <div class="output-line">Enter Core Password:</div>
-        <div id="input-line">
-            <span style="margin-right:10px;">root@krsh_ai:~#</span>
-            <input type="password" id="authKey" autofocus onkeydown="handleInput(event)">
+        <span class="line">KRSH_AI KERNEL v2.6.0_STABLE (ENCRYPTED)</span>
+        <span class="line">AUTHORIZED PERSONNEL ONLY.</span>
+        <span class="line">&nbsp;</span>
+        <span class="line">Enter Core Password:</span>
+        <div id="input-area">
+            <span style="margin-right: 10px;">root@krsh_ai:~#</span>
+            <input type="password" id="authKey" autofocus onkeydown="check(event)">
             <span id="caret"></span>
         </div>
-        <div id="logging-screen" class="hidden"></div>
+        <div id="logs"></div>
     </div>
 
     <script>
-        const loggingScreen = document.getElementById('logging-screen');
-        const inputLine = document.getElementById('input-line');
+        /* Logika utama terminal Kanza */
+        const logs = document.getElementById('logs');
+        const inputArea = document.getElementById('input-area');
         const authKey = document.getElementById('authKey');
 
-        function handleInput(e) {
+        function check(e) {
             if (e.key === 'Enter') {
-                runPrank();
+                run();
             }
         }
 
-        /* Script utama untuk menjalankan simulasi hacker */
-        async function runPrank() {
+        async function run() {
             const secret = "Kz!@#99_X-Rsh.Ai";
-            const input = authKey.value;
-            inputLine.classList.add('hidden');
-
-            if (input === secret) {
-                printLine("> Checking credentials...");
+            if (authKey.value === secret) {
+                inputArea.classList.add('hidden');
+                await print("> Accessing core system...");
                 await sleep(1000);
-                printLine("> [OK] Admin access granted.");
+                await print("> [OK] Authentication successful.");
                 await sleep(500);
-                printLine("> Loading exploit modules...");
-                await sleep(1000);
-                await startTypeEffect();
+                await startPrank();
             } else {
-                printLine("> [ERROR] WRONG PASSWORD. INTRUDER ALERT.");
-                await sleep(1500);
+                alert("ACCESS DENIED");
                 location.reload();
             }
         }
 
-        function printLine(text) {
-            const line = document.createElement('div');
-            line.className = 'output-line';
-            line.textContent = text;
-            loggingScreen.appendChild(line);
-            loggingScreen.classList.remove('hidden');
+        async function print(text) {
+            const l = document.createElement('span');
+            l.className = 'line';
+            l.textContent = text;
+            logs.appendChild(l);
         }
 
         function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-        async function startTypeEffect() {
-            const lines = [
+        async function startPrank() {
+            const msg = [
                 "------------------------------------------",
-                "SYSTEM STATUS: ONLINE",
-                "IP ADDRESS   : 192.168.1.1",
-                "DATABASE     : CONNECTED",
+                "WELCOME, ADMIN KANZA",
                 "------------------------------------------",
-                "> Infiltrating server... DONE",
-                "> Fetching private data... DONE",
-                "> Bypassing security layers... DONE",
+                "> Server Status : Online",
+                "> AI Core       : Active",
+                "> Logs          : Video Injected Successfully",
+                "> Source        : Instagram Reels Decrypted",
                 "------------------------------------------",
-                "STATUS: ALL SYSTEMS CONTROLLED.",
-                "WELCOME BACK, KANZA.",
-                "------------------------------------------"
+                "root@krsh_ai: Ready._"
             ];
-            for (let text of lines) {
-                const line = document.createElement('div');
-                line.className = 'output-line';
-                document.getElementById('terminal').appendChild(line);
-                for (let char of text) {
-                    line.textContent += char;
+            for (let t of msg) {
+                const l = document.createElement('span');
+                l.className = 'line';
+                logs.appendChild(l);
+                for (let c of t) {
+                    l.textContent += c;
                     await sleep(30);
                 }
-            }
-        }
-    </script>
-</body>
-</html>
-        }
-        button {
-            background: #238636;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-        button:hover { background: #2ea043; }
-        #content { display: none; text-align: left; }
-        .success-text { color: #39d353; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-    <div id="login-box">
-        <h1>KRSH.AI SYSTEM</h1>
-        <div id="auth-area">
-            <p>Enter Access Key:</p>
-            <input type="password" id="passInput" placeholder="••••••••••••">
-            <br>
-            <button onclick="checkAccess()">UNLOCK ACCESS</button>
-        </div>
-
-        <div id="content">
-            <p class="success-text">ACCESS GRANTED.</p>
-            <p>Welcome, Admin Kanza.</p>
-            <hr style="border: 0.5px solid #30363d;">
-            <p>> Server: Online</p>
-            <p>> AI Core: Active</p>
-            <p>> Status: Video Injected Successfully</p>
-            <p>> Logs: Instagram Reels Decrypted</p>
-        </div>
-    </div>
-
-    <script>
-        function checkAccess() {
-            const secret = "Kz!@#99_X-Rsh.Ai";
-            const input = document.getElementById("passInput").value;
-            
-            if (input === secret) {
-                document.getElementById("auth-area").style.display = "none";
-                document.getElementById("content").style.display = "block";
-            } else {
-                alert("ACCESS DENIED: Unauthorized Signature Detected.");
-                document.getElementById("passInput").value = "";
             }
         }
     </script>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>krsh.ai | Dashboard</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #58a6ff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        #login-box {
+            border: 1px solid #30363d;
+            padding: 30px;
+            background: #161b22;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+            text-align: center;
+            border-radius: 8px;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 20px; color: #f0f6fc; }
+        input {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #00ff00;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+            outline: none;
+            text-align: center;
+        }
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        button:hover { background: #2ea043; }
+        #content { display: none; text-align: left; }
+        .success-text { color: #39d353; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="login-box">
+        <h1>KRSH.AI SYSTEM</h1>
+        <div id="auth-area">
+            <p>Enter Access Key:</p>
+            <input type="password" id="passInput" placeholder="••••••••••••">
+            <br>
+            <button onclick="checkAccess()">UNLOCK ACCESS</button>
+        </div>
+
+        <div id="content">
+            <p class="success-text">ACCESS GRANTED.</p>
+            <p>Welcome, Admin Kanza.</p>
+            <hr style="border: 0.5px solid #30363d;">
+            <p>> Server: Online</p>
+            <p>> AI Core: Active</p>
+            <p>> Status: Video Injected Successfully</p>
+            <p>> Logs: Instagram Reels Decrypted</p>
+        </div>
+    </div>
+
+    <script>
+        function checkAccess() {
+            const secret = "Kz!@#99_X-Rsh.Ai";
+            const input = document.getElementById("passInput").value;
+            
+            if (input === secret) {
+                document.getElementById("auth-area").style.display = "none";
+                document.getElementById("content").style.display = "block";
+            } else {
+                alert("ACCESS DENIED: Unauthorized Signature Detected.");
+                document.getElementById("passInput").value = "";
+            }
+        }
+    </script>
+</body>
+</html>

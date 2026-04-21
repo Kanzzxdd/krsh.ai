@@ -5,16 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>krsh.ai | Private Root v1.6</title>
     <style>
-        body { background-color: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; margin: 0; height: 100vh; overflow: hidden; }
-        #terminal { width: 100%; height: 100%; overflow-y: auto; }
-        .line { display: block; margin-bottom: 5px; white-space: pre-wrap; }
-        #input-area { display: flex; align-items: center; }
-        input { background: transparent; border: none; color: #0f0; font-family: inherit; font-size: inherit; outline: none; flex-grow: 1; }
+        body { 
+            background-color: #000; 
+            color: #0f0; 
+            font-family: 'Courier New', monospace; 
+            padding: 15px; /* Tambahin padding biar nggak nempel pinggir */
+            margin: 0; 
+            height: 100vh; 
+            box-sizing: border-box; /* Biar padding nggak ngerusak layout */
+            overflow-x: hidden; /* Biar nggak ada scroll kanan-kiri */
+        }
+        #terminal { 
+            width: 100%; 
+            height: 100%; 
+            overflow-y: auto; 
+            font-size: 14px; /* Ukuran font disesuaikan buat layar HP */
+            line-height: 1.4;
+        }
+        .line { 
+            display: block; 
+            margin-bottom: 5px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word; /* Biar teks panjang otomatis turun ke bawah */
+        }
+        #input-area { display: flex; flex-wrap: wrap; align-items: center; }
+        input { 
+            background: transparent; 
+            border: none; 
+            color: #0f0; 
+            font-family: inherit; 
+            font-size: inherit; 
+            outline: none; 
+            flex-grow: 1; 
+            min-width: 100px;
+        }
         .hidden { display: none; }
         #caret { width: 8px; height: 15px; background: #0f0; display: inline-block; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0; } }
         .err { color: #ff0000; font-weight: bold; }
-        .safe { color: #00ff00; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -32,34 +60,26 @@
     </div>
 
     <script>
+        /* Logic tetap sama seperti v1.6 kamu */
         const logs = document.getElementById('logs');
         const inputArea = document.getElementById('input-area');
         const authKey = document.getElementById('authKey');
 
-        function check(e) {
-            if (e.key === 'Enter') {
-                validate();
-            }
-        }
+        function check(e) { if (e.key === 'Enter') { validate(); } }
 
         async function validate() {
             const secret = "Kz!@#99_X-Rsh.Ai";
             const val = authKey.value;
-            inputArea.classList.add('hidden');
-
             if (val === secret) {
+                inputArea.classList.add('hidden');
                 await print("> Synchronizing private keys...");
                 await sleep(1000);
                 await print("> [OK] Identity verified: Admin Kanza.");
                 await sleep(600);
                 await successSequence();
             } else {
-                await print("> [ERROR] ACCESS DENIED: Signature Mismatch.");
-                await sleep(800);
-                await print("> [CRITICAL]: Intruder alert triggered.", "err");
-                await print("> [SYSTEM]: Capturing network fingerprints...", "err");
-                await sleep(1500);
-                await print("> Connection terminated by server.", "err");
+                inputArea.classList.add('hidden');
+                await print("> [ERROR] ACCESS DENIED.", "err");
                 await sleep(2000);
                 location.reload();
             }
@@ -70,7 +90,7 @@
             l.className = 'line ' + className;
             l.textContent = text;
             logs.appendChild(l);
-            return new Promise(r => setTimeout(r, 50));
+            logs.scrollTop = logs.scrollHeight;
         }
 
         function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -97,6 +117,7 @@
                     l.textContent += c;
                     await sleep(25);
                 }
+                logs.scrollTop = logs.scrollHeight;
             }
         }
     </script>

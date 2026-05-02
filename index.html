@@ -13,45 +13,45 @@
             margin: 0; 
             height: 100vh; 
             box-sizing: border-box; 
-            overflow-x: hidden; 
+            overflow: hidden; 
         }
-        #terminal { 
-            width: 100%; 
-            height: 100%; 
-            overflow-y: auto; 
-            font-size: 14px; 
-            line-height: 1.4;
+        #terminal { width: 100%; height: 100%; overflow-y: auto; }
+        .line { display: block; margin-bottom: 5px; white-space: pre-wrap; }
+
+        /* Container Input */
+        #input-area { 
+            display: flex; 
+            align-items: center; 
+            position: relative; 
         }
-        .line { 
-            display: block; 
-            margin-bottom: 5px; 
-            white-space: pre-wrap; 
-            word-wrap: break-word; 
-        }
-        #input-area { display: flex; align-items: center; }
+
+        /* Input asli dibuat transparan & sembunyi di balik teks */
         input { 
-            background: transparent; 
-            border: none; 
-            color: #0f0; 
-            font-family: inherit; 
-            font-size: inherit; 
-            outline: none; 
-            flex-grow: 1; 
+            position: absolute;
+            left: 0;
+            opacity: 0; /* Benar-benar tidak terlihat */
+            width: 100%;
+            cursor: default;
+            border: none;
+            outline: none;
         }
-        .hidden { display: none; }
-        /* Kursor Blok Hijau sesuai screenshot kamu */
-        #caret, .fake-caret { 
-            width: 8px; 
-            height: 15px; 
+
+        /* Tampilan teks password (bintang/titik) yang kita buat sendiri */
+        #display-text { color: #0f0; letter-spacing: 2px; }
+
+        /* Kursor Blok Hijau sesuai screenshot */
+        #caret { 
+            width: 10px; 
+            height: 18px; 
             background: #0f0; 
             display: inline-block; 
             vertical-align: middle;
-            margin-left: 5px;
-            animation: blink 1s infinite; 
+            animation: blink 1s infinite;
+            margin-left: 2px;
         }
+
         @keyframes blink { 50% { opacity: 0; } }
-        .err { color: #ff0000; font-weight: bold; }
-        .db-info { color: #00ff00; border-left: 2px solid #0f0; padding-left: 10px; margin: 10px 0; }
+        .err { color: #ff0000; }
     </style>
 </head>
 <body>
@@ -60,35 +60,42 @@
         <span class="line">RESTRICTED ACCESS: ADMIN KANZA ONLY.</span>
         <span class="line">&nbsp;</span>
         <span class="line">Please authenticate to open secure tunnel:</span>
-        <div id="input-area">
+        
+        <div id="input-area" onclick="focusInput()">
             <span style="margin-right: 10px;">kanza@krsh_ai:~#</span>
-            <input type="password" id="authKey" autofocus onkeydown="check(event)">
-            <span id="caret"></span>
+            <span id="display-text"></span><span id="caret"></span>
+            <input type="password" id="authKey" autofocus oninput="updateDisplay()" onkeydown="check(event)">
         </div>
+        
         <div id="logs"></div>
     </div>
 
     <script>
+        const authKey = document.getElementById('authKey');
+        const displayText = document.getElementById('display-text');
         const logs = document.getElementById('logs');
         const inputArea = document.getElementById('input-area');
-        const authKey = document.getElementById('authKey');
+
+        // Fokus ke input kalau area diklik
+        function focusInput() { authKey.focus(); }
+
+        // Update tampilan karakter password
+        function updateDisplay() {
+            displayText.textContent = "*".repeat(authKey.value.length);
+        }
 
         function check(e) { if (e.key === 'Enter') { validate(); } }
 
         async function validate() {
             const secret = "Kz!@#99_X-Rsh.Ai";
-            const val = authKey.value;
-            if (val === secret) {
+            if (authKey.value === secret) {
                 inputArea.classList.add('hidden');
-                await print("> Synchronizing private keys...");
-                await sleep(1000);
                 await print("> [OK] Identity verified: Admin Kanza.");
-                await sleep(600);
                 await successSequence();
             } else {
-                inputArea.classList.add('hidden');
+                inputArea.style.display = 'none';
                 await print("> [ERROR] ACCESS DENIED.", "err");
-                await sleep(2000);
+                await new Promise(r => setTimeout(r, 2000));
                 location.reload();
             }
         }
@@ -98,65 +105,25 @@
             l.className = 'line ' + className;
             l.textContent = text;
             logs.appendChild(l);
-            logs.scrollTop = logs.scrollHeight;
         }
-
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
         async function successSequence() {
             const msg = [
                 "------------------------------------------",
-                "SYSTEM ONLINE - WELCOME HOME, BOSS.",
+                "SYSTEM ONLINE - WELCOME BOSS.",
                 "------------------------------------------",
-                "> Server Loc      : GitHub Pages (kanzzxdd)",
-                "> Webpage Status  : [SECURE / ON-SAFE]",
-                "> Bot AI Engine   : [ACTIVE / PROTECTED]",
-                "> Encryption      : AES-256 Enabled",
-                "------------------------------------------",
-                "Ready for your commands..."
+                "> Data Migrated to Private Database Server",
+                "Ready for commands..."
             ];
-
             for (let t of msg) {
                 const l = document.createElement('span');
                 l.className = 'line';
                 logs.appendChild(l);
                 for (let c of t) {
                     l.textContent += c;
-                    await sleep(20);
+                    await new Promise(r => setTimeout(r, 25));
                 }
             }
-            
-            // Panggil simulasi pemindahan database
-            await sleep(1000);
-            await showDatabaseReport("https://www.instagram.com/reel/DVbnqXMkqDP/");
-        }
-
-        async function showDatabaseReport(url) {
-            const time = new Date().toLocaleTimeString('id-ID');
-            await print("\n[!] MIGRATING LOCAL CACHE TO SERVER...");
-            await sleep(1500);
-
-            const report = document.createElement('div');
-            report.className = 'db-info';
-            report.innerHTML = `
-                📊 <b>SERVER LOG: DATA MIGRATION</b><br>
-                ──────────────────────────<br>
-                🤖 AI ASSISTANT: Process Complete<br>
-                🔗 Source: ${url}<br><br>
-                Informasi status telah dipindahkan ke:<br>
-                🗄️ DATABASE: private-kanza-server.db<br>
-                📍 LOCATION: /root/srv/database/logs/<br><br>
-                ✅ STATUS: Synchronized Success.<br>
-                [${time}] Data secured on KRSH Server.<br>
-                ──────────────────────────
-            `;
-            logs.appendChild(report);
-            
-            // Terakhir munculin kursor prompt satu aja di paling bawah
-            const finalLine = document.createElement('div');
-            finalLine.innerHTML = 'kanza@krsh_ai_private:~$ <span class="fake-caret"></span>';
-            logs.appendChild(finalLine);
-            logs.scrollTop = logs.scrollHeight;
         }
     </script>
 </body>

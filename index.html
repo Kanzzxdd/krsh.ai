@@ -15,53 +15,103 @@
             box-sizing: border-box; 
             overflow: hidden; 
         }
-        #terminal { width: 100%; height: 100%; overflow-y: auto; }
-        .line { display: block; margin-bottom: 5px; white-space: pre-wrap; }
+        #terminal { 
+            width: 100%; 
+            height: 100%; 
+            overflow-y: auto; 
+            font-size: 14px; 
+            line-height: 1.4;
+        }
+        .line { 
+            display: block; 
+            margin-bottom: 5px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+        }
 
-        /* Container Input */
+        /* Container Input Spesial untuk Fix Kursor */
         #input-area { 
             display: flex; 
             align-items: center; 
             position: relative; 
         }
-
-        /* Input asli dibuat transparan & sembunyi di balik teks */
         input { 
             position: absolute;
             left: 0;
-            opacity: 0; /* Benar-benar tidak terlihat */
+            opacity: 0; /* Sembunyikan input asli agar kursor '|' tidak muncul */
             width: 100%;
-            cursor: default;
             border: none;
             outline: none;
+            cursor: default;
         }
-
-        /* Tampilan teks password (bintang/titik) yang kita buat sendiri */
         #display-text { color: #0f0; letter-spacing: 2px; }
 
-        /* Kursor Blok Hijau sesuai screenshot */
-        #caret { 
+        /* Kursor Blok Hijau Solid */
+        #caret, .fake-caret { 
             width: 10px; 
             height: 18px; 
             background: #0f0; 
             display: inline-block; 
             vertical-align: middle;
-            animation: blink 1s infinite;
             margin-left: 2px;
+            animation: blink 1s infinite; 
         }
 
+        /* Notifikasi Maintenance Modern */
+        .maintenance-note {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(20, 20, 20, 0.95);
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 5px solid #0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .maintenance-note b { color: #0f0; display: block; margin-bottom: 2px; }
+        .hidden { display: none; }
+
         @keyframes blink { 50% { opacity: 0; } }
-        .err { color: #ff0000; }
+        @keyframes slideIn {
+            from { transform: translateX(-110%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .err { color: #ff0000; font-weight: bold; }
+        .db-report { 
+            color: #0f0; 
+            margin: 15px 0; 
+            padding: 10px; 
+            border: 1px dashed #0f0;
+            background: rgba(0, 255, 0, 0.05);
+        }
     </style>
 </head>
 <body>
+
+    <div id="maintenance-msg" class="maintenance-note hidden">
+        <div style="font-size: 24px;">🛠️</div>
+        <div>
+            <b>SISTEM MAINTENANCE</b>
+            Webpage ini sedang dalam perbaikan berkala oleh Admin Kanza.
+        </div>
+    </div>
+
     <div id="terminal">
         <span class="line">KRSH_AI PRIVATE KERNEL [Version 1.6.0_STABLE]</span>
         <span class="line">RESTRICTED ACCESS: ADMIN KANZA ONLY.</span>
         <span class="line">&nbsp;</span>
         <span class="line">Please authenticate to open secure tunnel:</span>
         
-        <div id="input-area" onclick="focusInput()">
+        <div id="input-area" onclick="document.getElementById('authKey').focus()">
             <span style="margin-right: 10px;">kanza@krsh_ai:~#</span>
             <span id="display-text"></span><span id="caret"></span>
             <input type="password" id="authKey" autofocus oninput="updateDisplay()" onkeydown="check(event)">
@@ -71,15 +121,13 @@
     </div>
 
     <script>
-        const authKey = document.getElementById('authKey');
-        const displayText = document.getElementById('display-text');
         const logs = document.getElementById('logs');
         const inputArea = document.getElementById('input-area');
+        const authKey = document.getElementById('authKey');
+        const displayText = document.getElementById('display-text');
+        const maintenanceMsg = document.getElementById('maintenance-msg');
 
-        // Fokus ke input kalau area diklik
-        function focusInput() { authKey.focus(); }
-
-        // Update tampilan karakter password
+        // Fungsi untuk mengupdate tampilan password (*)
         function updateDisplay() {
             displayText.textContent = "*".repeat(authKey.value.length);
         }
@@ -88,14 +136,21 @@
 
         async function validate() {
             const secret = "Kz!@#99_X-Rsh.Ai";
-            if (authKey.value === secret) {
+            const val = authKey.value;
+            
+            if (val === secret) {
                 inputArea.classList.add('hidden');
+                maintenanceMsg.classList.remove('hidden'); // Munculkan notif maintenance
+                
                 await print("> [OK] Identity verified: Admin Kanza.");
+                await sleep(800);
+                await print("> Establishing secure connection to KRSH_SERVER...");
+                await sleep(1200);
                 await successSequence();
             } else {
-                inputArea.style.display = 'none';
-                await print("> [ERROR] ACCESS DENIED.", "err");
-                await new Promise(r => setTimeout(r, 2000));
+                inputArea.classList.add('hidden');
+                await print("> [ERROR] ACCESS DENIED. TERMINATING SESSION...", "err");
+                await sleep(2000);
                 location.reload();
             }
         }
@@ -105,25 +160,51 @@
             l.className = 'line ' + className;
             l.textContent = text;
             logs.appendChild(l);
+            logs.scrollTop = logs.scrollHeight;
         }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
         async function successSequence() {
             const msg = [
                 "------------------------------------------",
-                "SYSTEM ONLINE - WELCOME BOSS.",
+                "SYSTEM ONLINE - WELCOME HOME, BOSS.",
                 "------------------------------------------",
-                "> Data Migrated to Private Database Server",
-                "Ready for commands..."
+                "> Server Loc      : GitHub Pages (kanzzxdd)",
+                "> Encryption      : AES-256 Enabled",
+                "------------------------------------------"
             ];
+
             for (let t of msg) {
                 const l = document.createElement('span');
                 l.className = 'line';
                 logs.appendChild(l);
                 for (let c of t) {
                     l.textContent += c;
-                    await new Promise(r => setTimeout(r, 25));
+                    await sleep(20);
                 }
             }
+            
+            // Tampilkan Laporan Database Migration
+            await sleep(1000);
+            const time = new Date().toLocaleTimeString('id-ID');
+            const dbReport = document.createElement('div');
+            dbReport.className = 'db-report';
+            dbReport.innerHTML = `
+                📊 <b>SERVER LOG: DATA MIGRATION</b><br>
+                🤖 AI Assistant: Task successfully completed.<br>
+                🗄️ Database: private-kanza-server.db<br>
+                📍 Storage: /root/srv/database/uploaded_logs/<br><br>
+                ✅ STATUS: Semua informasi status telah dipindahkan ke server pribadi Kanza.<br>
+                [${time}] - Synchronization Finish.
+            `;
+            logs.appendChild(dbReport);
+
+            // Munculkan prompt akhir dengan kursor tunggal
+            const final = document.createElement('div');
+            final.innerHTML = 'kanza@krsh_ai_private:~$ <span class="fake-caret"></span>';
+            logs.appendChild(final);
+            logs.scrollTop = logs.scrollHeight;
         }
     </script>
 </body>

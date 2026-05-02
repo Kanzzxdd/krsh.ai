@@ -5,57 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>krsh.ai | Private Root v1.6</title>
     <style>
-        body { 
-            background-color: #000; 
-            color: #0f0; 
-            font-family: 'Courier New', monospace; 
-            padding: 15px; 
-            margin: 0; 
-            height: 100vh; 
-            box-sizing: border-box; 
-            overflow: hidden; 
-        }
-        #terminal { 
-            width: 100%; 
-            height: 100%; 
-            overflow-y: auto; 
-            font-size: 13px; 
-            line-height: 1.4;
-        }
+        body { background-color: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 15px; margin: 0; height: 100vh; box-sizing: border-box; overflow: hidden; }
+        #terminal { width: 100%; height: 100%; overflow-y: auto; font-size: 13px; line-height: 1.4; }
         .line { display: block; margin-bottom: 5px; white-space: pre-wrap; }
-
-        /* Input System (Fix Cursor Double) */
         .input-container { display: flex; align-items: center; position: relative; }
-        .real-input { 
-            position: absolute; left: 0; opacity: 0; width: 100%;
-            border: none; outline: none; cursor: default;
-            caret-color: transparent;
+        .real-input { position: absolute; left: 0; opacity: 0; width: 100%; border: none; outline: none; cursor: default; caret-color: transparent; }
+        .display-text { color: #0f0; letter-spacing: 1px; }
+        .caret { width: 8px; height: 16px; background: #0f0; display: inline-block; vertical-align: middle; margin-left: 2px; animation: blink 1s infinite; }
+        
+        /* Popup Chat Box Modern */
+        #ai-popup {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 350px; height: 450px; background: #111; border: 1px solid #0f0;
+            border-radius: 12px; display: none; flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9); z-index: 20000; overflow: hidden;
+            font-family: sans-serif;
         }
-        .display-text { color: #0f0; letter-spacing: 2px; }
+        #chat-header { background: #1a1a1a; padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        #chat-content { flex: 1; padding: 15px; overflow-y: auto; color: #ccc; font-size: 13px; display: flex; flex-direction: column; gap: 10px; }
+        #chat-input-area { padding: 10px; background: #1a1a1a; display: flex; gap: 8px; }
+        #chat-msg { flex: 1; background: #222; border: 1px solid #333; border-radius: 5px; color: #fff; padding: 8px; outline: none; font-size: 13px; }
+        .msg-ai { align-self: flex-start; background: #333; padding: 8px 12px; border-radius: 12px 12px 12px 0; max-width: 80%; }
+        .msg-user { align-self: flex-end; background: #0f0; color: #000; padding: 8px 12px; border-radius: 12px 12px 0 12px; max-width: 80%; font-weight: bold; }
 
-        /* Single Block Cursor */
-        .caret { 
-            width: 8px; height: 16px; background: #0f0; 
-            display: inline-block; vertical-align: middle;
-            margin-left: 2px; animation: blink 1s infinite; 
-        }
-
-        /* Maintenance Box Compact */
-        .maintenance-note {
-            position: fixed; bottom: 20px; left: 20px;
-            background-color: rgba(18, 18, 18, 0.96); color: #fff;
-            padding: 12px 18px; border-radius: 8px; border-left: 3px solid #0f0;
-            font-family: sans-serif; font-size: 11px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.8); z-index: 10000;
-            display: flex; align-items: center; gap: 12px; max-width: 280px;
-            animation: fadeIn 1s ease-out forwards;
-        }
-        .maintenance-note b { color: #0f0; display: block; font-size: 12px; }
-
+        /* Maintenance Box */
+        .maintenance-note { position: fixed; bottom: 20px; left: 20px; background: rgba(18,18,18,0.9); color: #fff; padding: 12px; border-radius: 8px; border-left: 3px solid #0f0; font-family: sans-serif; font-size: 11px; z-index: 10000; display: flex; align-items: center; gap: 10px; animation: fadeIn 1s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes blink { 50% { opacity: 0; } }
         .hidden { display: none !important; }
-        .db-report { color: #0f0; margin: 15px 0; padding: 10px; border: 1px dashed #0f0; }
+        .db-report { color: #0f0; margin: 15px 0; padding: 10px; border: 1px dashed #0f0; background: rgba(0,255,0,0.02); }
     </style>
 </head>
 <body>
@@ -65,20 +43,30 @@
         <div><b>SISTEM MAINTENANCE</b>Sedang dalam perbaikan berkala oleh Admin Kanza.</div>
     </div>
 
+    <div id="ai-popup">
+        <div id="chat-header">
+            <span id="ai-title" style="color: #0f0; font-weight: bold; font-size: 14px;">AI ASSISTANT</span>
+            <button onclick="closeChat()" style="background: none; border: none; color: #ff4444; cursor: pointer; font-size: 18px;">&times;</button>
+        </div>
+        <div id="chat-content">
+            <div class="msg-ai">Halo Boss Kanza! Ada yang bisa aku bantu?</div>
+        </div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-msg" placeholder="Tulis pesan..." onkeydown="if(event.key==='Enter') sendChat()">
+            <button onclick="sendChat()" style="background: #0f0; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">🚀</button>
+        </div>
+    </div>
+
     <div id="terminal">
         <span class="line">KRSH_AI PRIVATE KERNEL [Version 1.6.0_STABLE]</span>
         <span class="line">RESTRICTED ACCESS: ADMIN KANZA ONLY.</span>
         <span class="line">&nbsp;</span>
-        <span class="line">Please authenticate to open secure tunnel:</span>
-        
         <div id="login-area" class="input-container" onclick="document.getElementById('authKey').focus()">
             <span style="margin-right: 10px;">kanza@krsh_ai:~#</span>
             <span id="login-display" class="display-text"></span><span id="login-caret" class="caret"></span>
             <input type="password" id="authKey" class="real-input" autofocus oninput="updateLoginDisplay()" onkeydown="handleLogin(event)">
         </div>
-        
         <div id="logs"></div>
-
         <div id="command-area" class="input-container hidden" onclick="document.getElementById('cmdInput').focus()">
             <span style="margin-right: 10px;">kanza@krsh_ai_private:~$</span>
             <span id="cmd-display" class="display-text" style="letter-spacing: 0;"></span><span class="caret"></span>
@@ -92,71 +80,78 @@
         const cmdInput = document.getElementById('cmdInput');
         const cmdDisplay = document.getElementById('cmd-display');
         const logs = document.getElementById('logs');
+        const aiPopup = document.getElementById('ai-popup');
+        
+        let chatState = 0; // 0: Normal, 1: Ask API, 2: Ask Name
+        let tempApiKey = "";
 
         function updateLoginDisplay() { loginDisplay.textContent = "*".repeat(authKey.value.length); }
         function updateCmdDisplay() { cmdDisplay.textContent = cmdInput.value; }
 
         async function handleLogin(e) {
             if (e.key === 'Enter') {
-                const secret = "Kz!@#99_X-Rsh.Ai";
-                if (authKey.value === secret) {
+                if (authKey.value === "Kz!@#99_X-Rsh.Ai") {
                     document.getElementById('login-area').classList.add('hidden');
                     await print("> [OK] Identity verified: Admin Kanza.");
                     await successSequence();
-                } else {
-                    location.reload();
-                }
+                } else { location.reload(); }
             }
         }
 
         async function handleCommand(e) {
             if (e.key === 'Enter') {
-                const cmd = cmdInput.value.trim().toLowerCase(); // Pakai trim biar spasi di depan/belakang aman
-                const currentInput = cmdInput.value;
-                cmdInput.value = ""; 
-                updateCmdDisplay();
+                const fullCmd = cmdInput.value;
+                const cmdClean = fullCmd.trim().toLowerCase();
+                cmdInput.value = ""; updateCmdDisplay();
+                await print(`kanza@krsh_ai_private:~$ ${fullCmd}`);
 
-                // Echo perintah yang baru diketik biar kayak terminal asli
-                await print(`kanza@krsh_ai_private:~$ ${currentInput}`);
-
-                if (cmd === "refresh" || cmd === "refresh pages" || cmd === "reboot" || cmd === "system --reload") {
-                    await print("> Initiating system reboot...");
+                if (chatState === 0) {
+                    if (cmdClean === "ai --chat") {
+                        chatState = 1;
+                        await print("\n🔑 Masukkan API Key Anda:");
+                    } else if (["refresh", "refresh pages", "reboot"].includes(cmdClean)) {
+                        location.reload();
+                    } else { await print(`> Command '${fullCmd}' not found.`); }
+                } 
+                else if (chatState === 1) {
+                    tempApiKey = fullCmd;
+                    chatState = 2;
+                    await print("> API Key tersimpan.");
+                    await print("🤖 Berikan nama untuk AI (atau ketik -skip):");
+                }
+                else if (chatState === 2) {
+                    const aiName = (cmdClean === "-skip") ? "ZANDER AI" : fullCmd.toUpperCase();
+                    document.getElementById('ai-title').textContent = aiName;
+                    chatState = 0;
+                    await print("> Menginisialisasi Popup Box...");
                     await new Promise(r => setTimeout(r, 1000));
-                    location.reload();
-                } else if (cmd !== "") {
-                    await print(`> Command '${currentInput}' not found.`);
+                    aiPopup.style.display = 'flex';
                 }
             }
         }
 
-        async function print(text) {
-            const l = document.createElement('span');
-            l.className = 'line';
-            l.textContent = text;
-            logs.appendChild(l);
-            logs.scrollTop = logs.scrollHeight;
+        function sendChat() {
+            const input = document.getElementById('chat-msg');
+            const content = document.getElementById('chat-content');
+            if (input.value.trim() === "") return;
+
+            content.innerHTML += `<div class="msg-user">${input.value}</div>`;
+            const userVal = input.value;
+            input.value = "";
+            content.scrollTop = content.scrollHeight;
+
+            setTimeout(() => {
+                content.innerHTML += `<div class="msg-ai">Maaf Boss Kanza, sebagai simulasi, aku belum terhubung ke API beneran. Tapi pesan "${userVal}" sudah aku terima!</div>`;
+                content.scrollTop = content.scrollHeight;
+            }, 1000);
         }
 
+        function closeChat() { aiPopup.style.display = 'none'; }
+        async function print(text) { const l = document.createElement('span'); l.className = 'line'; l.textContent = text; logs.appendChild(l); logs.scrollTop = logs.scrollHeight; }
         async function successSequence() {
-            const msg = [
-                "------------------------------------------",
-                "SYSTEM ONLINE - WELCOME BOSS.",
-                "------------------------------------------",
-                "> Database Sync   : [READY]",
-                "------------------------------------------"
-            ];
-            for (let t of msg) {
-                const l = document.createElement('span');
-                l.className = 'line';
-                logs.appendChild(l);
-                for (let c of t) { l.textContent += c; await new Promise(r => setTimeout(r, 20)); }
-            }
-            
-            const db = document.createElement('div');
-            db.className = 'db-report';
-            db.innerHTML = `📊 <b>SERVER LOG: MIGRATION SUCCESS</b><br>Data secured on private-kanza-server.db`;
-            logs.appendChild(db);
-
+            await print("------------------------------------------");
+            await print("SYSTEM ONLINE - WELCOME BOSS.");
+            await print("Type 'ai --chat' to start AI Assistant.");
             document.getElementById('command-area').classList.remove('hidden');
             cmdInput.focus();
         }

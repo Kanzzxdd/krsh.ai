@@ -16,40 +16,38 @@
         /* Popup Chat Box Modern */
         #ai-popup {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 350px; height: 450px; background: #111; border: 1px solid #0f0;
+            width: 320px; height: 450px; background: #111; border: 1px solid #0f0;
             border-radius: 12px; display: none; flex-direction: column;
             box-shadow: 0 20px 50px rgba(0,0,0,0.9); z-index: 20000; overflow: hidden;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', sans-serif;
         }
         #chat-header { background: #1a1a1a; padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
         #chat-content { flex: 1; padding: 15px; overflow-y: auto; color: #ccc; font-size: 13px; display: flex; flex-direction: column; gap: 10px; }
         #chat-input-area { padding: 10px; background: #1a1a1a; display: flex; gap: 8px; }
-        #chat-msg { flex: 1; background: #222; border: 1px solid #333; border-radius: 5px; color: #fff; padding: 8px; outline: none; font-size: 13px; }
-        .msg-ai { align-self: flex-start; background: #333; padding: 8px 12px; border-radius: 12px 12px 12px 0; max-width: 80%; }
-        .msg-user { align-self: flex-end; background: #0f0; color: #000; padding: 8px 12px; border-radius: 12px 12px 0 12px; max-width: 80%; font-weight: bold; }
+        #chat-msg { flex: 1; background: #222; border: 1px solid #333; border-radius: 5px; color: #fff; padding: 8px; outline: none; font-size: 12px; }
+        .msg-ai { align-self: flex-start; background: #333; padding: 8px 12px; border-radius: 12px 12px 12px 0; max-width: 85%; line-height: 1.4; }
+        .msg-user { align-self: flex-end; background: #0f0; color: #000; padding: 8px 12px; border-radius: 12px 12px 0 12px; max-width: 85%; font-weight: bold; }
 
-        /* Maintenance Box */
-        .maintenance-note { position: fixed; bottom: 20px; left: 20px; background: rgba(18,18,18,0.9); color: #fff; padding: 12px; border-radius: 8px; border-left: 3px solid #0f0; font-family: sans-serif; font-size: 11px; z-index: 10000; display: flex; align-items: center; gap: 10px; animation: fadeIn 1s; }
+        .maintenance-note { position: fixed; bottom: 20px; left: 20px; background: rgba(18,18,18,0.9); color: #fff; padding: 10px; border-radius: 8px; border-left: 3px solid #0f0; font-family: sans-serif; font-size: 10px; z-index: 10000; display: flex; align-items: center; gap: 10px; animation: fadeIn 1s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes blink { 50% { opacity: 0; } }
         .hidden { display: none !important; }
-        .db-report { color: #0f0; margin: 15px 0; padding: 10px; border: 1px dashed #0f0; background: rgba(0,255,0,0.02); }
     </style>
 </head>
 <body>
 
     <div id="maintenance-msg" class="maintenance-note">
-        <div style="font-size: 18px;">🛠️</div>
+        <div style="font-size: 16px;">🛠️</div>
         <div><b>SISTEM MAINTENANCE</b>Sedang dalam perbaikan berkala oleh Admin Kanza.</div>
     </div>
 
     <div id="ai-popup">
         <div id="chat-header">
-            <span id="ai-title" style="color: #0f0; font-weight: bold; font-size: 14px;">AI ASSISTANT</span>
+            <span id="ai-title" style="color: #0f0; font-weight: bold; font-size: 13px;">AI ASSISTANT</span>
             <button onclick="closeChat()" style="background: none; border: none; color: #ff4444; cursor: pointer; font-size: 18px;">&times;</button>
         </div>
         <div id="chat-content">
-            <div class="msg-ai">Halo Boss Kanza! Ada yang bisa aku bantu?</div>
+            <div class="msg-ai">Koneksi aman. Silahkan kirim pesan, Boss Kanza.</div>
         </div>
         <div id="chat-input-area">
             <input type="text" id="chat-msg" placeholder="Tulis pesan..." onkeydown="if(event.key==='Enter') sendChat()">
@@ -82,8 +80,8 @@
         const logs = document.getElementById('logs');
         const aiPopup = document.getElementById('ai-popup');
         
-        let chatState = 0; // 0: Normal, 1: Ask API, 2: Ask Name
-        let tempApiKey = "";
+        let chatState = 0; 
+        let userApiKey = "";
 
         function updateLoginDisplay() { loginDisplay.textContent = "*".repeat(authKey.value.length); }
         function updateCmdDisplay() { cmdDisplay.textContent = cmdInput.value; }
@@ -108,42 +106,51 @@
                 if (chatState === 0) {
                     if (cmdClean === "ai --chat") {
                         chatState = 1;
-                        await print("\n🔑 Masukkan API Key Anda:");
+                        await print("\n🔑 Masukkan API Key Google Gemini Anda:");
                     } else if (["refresh", "refresh pages", "reboot"].includes(cmdClean)) {
                         location.reload();
-                    } else { await print(`> Command '${fullCmd}' not found.`); }
+                    } else if (cmdClean !== "") { await print(`> Command '${fullCmd}' not found.`); }
                 } 
                 else if (chatState === 1) {
-                    tempApiKey = fullCmd;
+                    userApiKey = fullCmd;
                     chatState = 2;
-                    await print("> API Key tersimpan.");
-                    await print("🤖 Berikan nama untuk AI (atau ketik -skip):");
+                    await print("> API Key tersimpan secara lokal.");
+                    await print("🤖 Nama AI (atau ketik -skip):");
                 }
                 else if (chatState === 2) {
                     const aiName = (cmdClean === "-skip") ? "ZANDER AI" : fullCmd.toUpperCase();
                     document.getElementById('ai-title').textContent = aiName;
                     chatState = 0;
-                    await print("> Menginisialisasi Popup Box...");
+                    await print("> Menghubungkan ke Neural Link...");
                     await new Promise(r => setTimeout(r, 1000));
                     aiPopup.style.display = 'flex';
                 }
             }
         }
 
-        function sendChat() {
+        async function sendChat() {
             const input = document.getElementById('chat-msg');
             const content = document.getElementById('chat-content');
-            if (input.value.trim() === "") return;
+            const userMsg = input.value.trim();
+            if (userMsg === "" || !userApiKey) return;
 
-            content.innerHTML += `<div class="msg-user">${input.value}</div>`;
-            const userVal = input.value;
+            content.innerHTML += `<div class="msg-user">${userMsg}</div>`;
             input.value = "";
             content.scrollTop = content.scrollHeight;
 
-            setTimeout(() => {
-                content.innerHTML += `<div class="msg-ai">Maaf Boss Kanza, sebagai simulasi, aku belum terhubung ke API beneran. Tapi pesan "${userVal}" sudah aku terima!</div>`;
-                content.scrollTop = content.scrollHeight;
-            }, 1000);
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: userMsg }] }] })
+                });
+                const data = await response.json();
+                const aiResponse = data.candidates[0].content.parts[0].text;
+                content.innerHTML += `<div class="msg-ai">${aiResponse}</div>`;
+            } catch (err) {
+                content.innerHTML += `<div class="msg-ai" style="color:red">Error: Pastikan API Key valid.</div>`;
+            }
+            content.scrollTop = content.scrollHeight;
         }
 
         function closeChat() { aiPopup.style.display = 'none'; }
@@ -151,7 +158,7 @@
         async function successSequence() {
             await print("------------------------------------------");
             await print("SYSTEM ONLINE - WELCOME BOSS.");
-            await print("Type 'ai --chat' to start AI Assistant.");
+            await print("Type 'ai --chat' to start Neural Session.");
             document.getElementById('command-area').classList.remove('hidden');
             cmdInput.focus();
         }

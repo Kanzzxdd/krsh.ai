@@ -22,86 +22,66 @@
             font-size: 14px; 
             line-height: 1.4;
         }
-        .line { 
-            display: block; 
-            margin-bottom: 5px; 
-            white-space: pre-wrap; 
-            word-wrap: break-word; 
-        }
+        .line { display: block; margin-bottom: 5px; white-space: pre-wrap; }
 
-        /* Container Input Spesial untuk Fix Kursor */
-        #input-area { 
-            display: flex; 
-            align-items: center; 
-            position: relative; 
-        }
+        /* Input System (Fix Cursor Double) */
+        #input-area { display: flex; align-items: center; position: relative; }
         input { 
-            position: absolute;
-            left: 0;
-            opacity: 0; /* Sembunyikan input asli agar kursor '|' tidak muncul */
-            width: 100%;
-            border: none;
-            outline: none;
-            cursor: default;
+            position: absolute; left: 0; opacity: 0; width: 100%;
+            border: none; outline: none; cursor: default;
         }
         #display-text { color: #0f0; letter-spacing: 2px; }
 
-        /* Kursor Blok Hijau Solid */
+        /* Single Block Cursor */
         #caret, .fake-caret { 
-            width: 10px; 
-            height: 18px; 
-            background: #0f0; 
-            display: inline-block; 
-            vertical-align: middle;
-            margin-left: 2px;
-            animation: blink 1s infinite; 
+            width: 10px; height: 18px; background: #0f0; 
+            display: inline-block; vertical-align: middle;
+            margin-left: 2px; animation: blink 1s infinite; 
         }
 
-        /* Notifikasi Maintenance Modern */
+        /* Modern Maintenance Box (Fade In) */
         .maintenance-note {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background-color: rgba(20, 20, 20, 0.95);
+            bottom: 25px;
+            left: 25px;
+            background-color: rgba(15, 15, 15, 0.98);
             color: #fff;
-            padding: 15px 20px;
-            border-radius: 10px;
-            border-left: 5px solid #0f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 18px 25px;
+            border-radius: 12px;
+            border-left: 4px solid #0f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             font-size: 13px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
             z-index: 10000;
             display: flex;
             align-items: center;
             gap: 15px;
-            animation: slideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            /* Animation Fade In */
+            animation: fadeIn 1.2s ease-in-out forwards;
         }
-        .maintenance-note b { color: #0f0; display: block; margin-bottom: 2px; }
-        .hidden { display: none; }
+        .maintenance-note b { color: #0f0; display: block; margin-bottom: 3px; font-size: 14px; }
 
-        @keyframes blink { 50% { opacity: 0; } }
-        @keyframes slideIn {
-            from { transform: translateX(-110%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes blink { 50% { opacity: 0; } }
         
         .err { color: #ff0000; font-weight: bold; }
         .db-report { 
-            color: #0f0; 
-            margin: 15px 0; 
-            padding: 10px; 
-            border: 1px dashed #0f0;
-            background: rgba(0, 255, 0, 0.05);
+            color: #0f0; margin: 15px 0; padding: 10px; 
+            border: 1px dashed #0f0; background: rgba(0, 255, 0, 0.03);
         }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="maintenance-msg" class="maintenance-note hidden">
+    <div id="maintenance-msg" class="maintenance-note">
         <div style="font-size: 24px;">🛠️</div>
         <div>
             <b>SISTEM MAINTENANCE</b>
-            Webpage ini sedang dalam perbaikan berkala oleh Admin Kanza.
+            Webpage sedang dalam perbaikan berkala oleh Admin Kanza.
         </div>
     </div>
 
@@ -125,9 +105,7 @@
         const inputArea = document.getElementById('input-area');
         const authKey = document.getElementById('authKey');
         const displayText = document.getElementById('display-text');
-        const maintenanceMsg = document.getElementById('maintenance-msg');
 
-        // Fungsi untuk mengupdate tampilan password (*)
         function updateDisplay() {
             displayText.textContent = "*".repeat(authKey.value.length);
         }
@@ -136,20 +114,14 @@
 
         async function validate() {
             const secret = "Kz!@#99_X-Rsh.Ai";
-            const val = authKey.value;
-            
-            if (val === secret) {
+            if (authKey.value === secret) {
                 inputArea.classList.add('hidden');
-                maintenanceMsg.classList.remove('hidden'); // Munculkan notif maintenance
-                
                 await print("> [OK] Identity verified: Admin Kanza.");
                 await sleep(800);
-                await print("> Establishing secure connection to KRSH_SERVER...");
-                await sleep(1200);
                 await successSequence();
             } else {
                 inputArea.classList.add('hidden');
-                await print("> [ERROR] ACCESS DENIED. TERMINATING SESSION...", "err");
+                await print("> [ERROR] ACCESS DENIED.", "err");
                 await sleep(2000);
                 location.reload();
             }
@@ -168,10 +140,10 @@
         async function successSequence() {
             const msg = [
                 "------------------------------------------",
-                "SYSTEM ONLINE - WELCOME HOME, BOSS.",
+                "SYSTEM ONLINE - WELCOME BOSS.",
                 "------------------------------------------",
-                "> Server Loc      : GitHub Pages (kanzzxdd)",
-                "> Encryption      : AES-256 Enabled",
+                "> Security        : [ENCRYPTED]",
+                "> Database Sync   : [READY]",
                 "------------------------------------------"
             ];
 
@@ -181,26 +153,23 @@
                 logs.appendChild(l);
                 for (let c of t) {
                     l.textContent += c;
-                    await sleep(20);
+                    await sleep(25);
                 }
             }
             
-            // Tampilkan Laporan Database Migration
             await sleep(1000);
             const time = new Date().toLocaleTimeString('id-ID');
             const dbReport = document.createElement('div');
             dbReport.className = 'db-report';
             dbReport.innerHTML = `
                 📊 <b>SERVER LOG: DATA MIGRATION</b><br>
-                🤖 AI Assistant: Task successfully completed.<br>
+                🤖 AI Assistant: Status info moved to server.<br>
                 🗄️ Database: private-kanza-server.db<br>
-                📍 Storage: /root/srv/database/uploaded_logs/<br><br>
-                ✅ STATUS: Semua informasi status telah dipindahkan ke server pribadi Kanza.<br>
-                [${time}] - Synchronization Finish.
+                ✅ STATUS: Synchronized Success.<br>
+                [${time}] - Securely recorded.
             `;
             logs.appendChild(dbReport);
 
-            // Munculkan prompt akhir dengan kursor tunggal
             const final = document.createElement('div');
             final.innerHTML = 'kanza@krsh_ai_private:~$ <span class="fake-caret"></span>';
             logs.appendChild(final);

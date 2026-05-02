@@ -93,11 +93,9 @@
         const cmdDisplay = document.getElementById('cmd-display');
         const logs = document.getElementById('logs');
 
-        // Fungsi Update Tampilan Input
         function updateLoginDisplay() { loginDisplay.textContent = "*".repeat(authKey.value.length); }
         function updateCmdDisplay() { cmdDisplay.textContent = cmdInput.value; }
 
-        // Handler Login
         async function handleLogin(e) {
             if (e.key === 'Enter') {
                 const secret = "Kz!@#99_X-Rsh.Ai";
@@ -111,19 +109,22 @@
             }
         }
 
-        // Handler Perintah Setelah Login
         async function handleCommand(e) {
             if (e.key === 'Enter') {
-                const cmd = cmdInput.value.toLowerCase();
+                const cmd = cmdInput.value.trim().toLowerCase(); // Pakai trim biar spasi di depan/belakang aman
+                const currentInput = cmdInput.value;
                 cmdInput.value = ""; 
                 updateCmdDisplay();
 
-                if (cmd === "refresh" || cmd === "reboot") {
-                    await print("\n> Initiating system reboot...");
+                // Echo perintah yang baru diketik biar kayak terminal asli
+                await print(`kanza@krsh_ai_private:~$ ${currentInput}`);
+
+                if (cmd === "refresh" || cmd === "refresh pages" || cmd === "reboot" || cmd === "system --reload") {
+                    await print("> Initiating system reboot...");
                     await new Promise(r => setTimeout(r, 1000));
                     location.reload();
                 } else if (cmd !== "") {
-                    await print(`\n> Command '${cmd}' not found.`);
+                    await print(`> Command '${currentInput}' not found.`);
                 }
             }
         }
@@ -151,13 +152,11 @@
                 for (let c of t) { l.textContent += c; await new Promise(r => setTimeout(r, 20)); }
             }
             
-            // Laporan Database
             const db = document.createElement('div');
             db.className = 'db-report';
             db.innerHTML = `📊 <b>SERVER LOG: MIGRATION SUCCESS</b><br>Data secured on private-kanza-server.db`;
             logs.appendChild(db);
 
-            // Munculkan kolom perintah baru
             document.getElementById('command-area').classList.remove('hidden');
             cmdInput.focus();
         }

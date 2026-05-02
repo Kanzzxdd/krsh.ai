@@ -25,64 +25,44 @@
         .line { display: block; margin-bottom: 5px; white-space: pre-wrap; }
 
         /* Input System (Fix Cursor Double) */
-        #input-area { display: flex; align-items: center; position: relative; }
-        input { 
+        .input-container { display: flex; align-items: center; position: relative; }
+        .real-input { 
             position: absolute; left: 0; opacity: 0; width: 100%;
             border: none; outline: none; cursor: default;
+            caret-color: transparent;
         }
-        #display-text { color: #0f0; letter-spacing: 2px; }
+        .display-text { color: #0f0; letter-spacing: 2px; }
 
         /* Single Block Cursor */
-        #caret, .fake-caret { 
+        .caret { 
             width: 8px; height: 16px; background: #0f0; 
             display: inline-block; vertical-align: middle;
             margin-left: 2px; animation: blink 1s infinite; 
         }
 
-        /* Modern & Compact Maintenance Box */
+        /* Maintenance Box Compact */
         .maintenance-note {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background-color: rgba(18, 18, 18, 0.96);
-            color: #fff;
-            padding: 12px 18px;
-            border-radius: 8px;
-            border-left: 3px solid #0f0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 11px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.8);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            max-width: 280px;
+            position: fixed; bottom: 20px; left: 20px;
+            background-color: rgba(18, 18, 18, 0.96); color: #fff;
+            padding: 12px 18px; border-radius: 8px; border-left: 3px solid #0f0;
+            font-family: sans-serif; font-size: 11px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.8); z-index: 10000;
+            display: flex; align-items: center; gap: 12px; max-width: 280px;
             animation: fadeIn 1s ease-out forwards;
         }
-        .maintenance-note b { color: #0f0; display: block; margin-bottom: 2px; font-size: 12px; }
+        .maintenance-note b { color: #0f0; display: block; font-size: 12px; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes blink { 50% { opacity: 0; } }
-        
-        .err { color: #ff0000; font-weight: bold; }
-        .db-report { 
-            color: #0f0; margin: 15px 0; padding: 10px; 
-            border: 1px dashed #0f0; background: rgba(0, 255, 0, 0.03);
-        }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+        .db-report { color: #0f0; margin: 15px 0; padding: 10px; border: 1px dashed #0f0; }
     </style>
 </head>
 <body>
 
     <div id="maintenance-msg" class="maintenance-note">
         <div style="font-size: 18px;">🛠️</div>
-        <div>
-            <b>SISTEM MAINTENANCE</b>
-            Sedang dalam perbaikan berkala oleh Admin Kanza.
-        </div>
+        <div><b>SISTEM MAINTENANCE</b>Sedang dalam perbaikan berkala oleh Admin Kanza.</div>
     </div>
 
     <div id="terminal">
@@ -91,101 +71,95 @@
         <span class="line">&nbsp;</span>
         <span class="line">Please authenticate to open secure tunnel:</span>
         
-        <div id="input-area" onclick="document.getElementById('authKey').focus()">
+        <div id="login-area" class="input-container" onclick="document.getElementById('authKey').focus()">
             <span style="margin-right: 10px;">kanza@krsh_ai:~#</span>
-            <span id="display-text"></span><span id="caret"></span>
-            <input type="password" id="authKey" autofocus oninput="updateDisplay()" onkeydown="check(event)">
+            <span id="login-display" class="display-text"></span><span id="login-caret" class="caret"></span>
+            <input type="password" id="authKey" class="real-input" autofocus oninput="updateLoginDisplay()" onkeydown="handleLogin(event)">
         </div>
         
         <div id="logs"></div>
+
+        <div id="command-area" class="input-container hidden" onclick="document.getElementById('cmdInput').focus()">
+            <span style="margin-right: 10px;">kanza@krsh_ai_private:~$</span>
+            <span id="cmd-display" class="display-text" style="letter-spacing: 0;"></span><span class="caret"></span>
+            <input type="text" id="cmdInput" class="real-input" oninput="updateCmdDisplay()" onkeydown="handleCommand(event)">
+        </div>
     </div>
 
     <script>
-        const logs = document.getElementById('logs');
-        const inputArea = document.getElementById('input-area');
         const authKey = document.getElementById('authKey');
-        const displayText = document.getElementById('display-text');
+        const loginDisplay = document.getElementById('login-display');
+        const cmdInput = document.getElementById('cmdInput');
+        const cmdDisplay = document.getElementById('cmd-display');
+        const logs = document.getElementById('logs');
 
-        function updateDisplay() {
-            displayText.textContent = "*".repeat(authKey.value.length);
-        }
+        // Fungsi Update Tampilan Input
+        function updateLoginDisplay() { loginDisplay.textContent = "*".repeat(authKey.value.length); }
+        function updateCmdDisplay() { cmdDisplay.textContent = cmdInput.value; }
 
-        function check(e) { if (e.key === 'Enter') { validate(); } }
-
-        async function validate() {
-            const secret = "Kz!@#99_X-Rsh.Ai";
-            // Command Tambahan: system --reload
-            if (authKey.value.toLowerCase() === "system --reload") {
-                await print("\n> Initiating system reboot...");
-                await sleep(500);
-                await print("> Cleaning local cache...");
-                await sleep(1000);
-                await print("> Reloading pages...");
-                await sleep(500);
-                location.reload();
-                return;
-            }
-
-            if (authKey.value === secret) {
-                inputArea.classList.add('hidden');
-                await print("> [OK] Identity verified: Admin Kanza.");
-                await sleep(800);
-                await successSequence();
-            } else {
-                inputArea.classList.add('hidden');
-                await print("> [ERROR] ACCESS DENIED.", "err");
-                await sleep(2000);
-                location.reload();
+        // Handler Login
+        async function handleLogin(e) {
+            if (e.key === 'Enter') {
+                const secret = "Kz!@#99_X-Rsh.Ai";
+                if (authKey.value === secret) {
+                    document.getElementById('login-area').classList.add('hidden');
+                    await print("> [OK] Identity verified: Admin Kanza.");
+                    await successSequence();
+                } else {
+                    location.reload();
+                }
             }
         }
 
-        async function print(text, className = "") {
+        // Handler Perintah Setelah Login
+        async function handleCommand(e) {
+            if (e.key === 'Enter') {
+                const cmd = cmdInput.value.toLowerCase();
+                cmdInput.value = ""; 
+                updateCmdDisplay();
+
+                if (cmd === "refresh" || cmd === "reboot") {
+                    await print("\n> Initiating system reboot...");
+                    await new Promise(r => setTimeout(r, 1000));
+                    location.reload();
+                } else if (cmd !== "") {
+                    await print(`\n> Command '${cmd}' not found.`);
+                }
+            }
+        }
+
+        async function print(text) {
             const l = document.createElement('span');
-            l.className = 'line ' + className;
+            l.className = 'line';
             l.textContent = text;
             logs.appendChild(l);
             logs.scrollTop = logs.scrollHeight;
         }
-
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
         async function successSequence() {
             const msg = [
                 "------------------------------------------",
                 "SYSTEM ONLINE - WELCOME BOSS.",
                 "------------------------------------------",
-                "> Security        : [ENCRYPTED]",
                 "> Database Sync   : [READY]",
                 "------------------------------------------"
             ];
-
             for (let t of msg) {
                 const l = document.createElement('span');
                 l.className = 'line';
                 logs.appendChild(l);
-                for (let c of t) {
-                    l.textContent += c;
-                    await sleep(25);
-                }
+                for (let c of t) { l.textContent += c; await new Promise(r => setTimeout(r, 20)); }
             }
             
-            await sleep(1000);
-            const time = new Date().toLocaleTimeString('id-ID');
-            const dbReport = document.createElement('div');
-            dbReport.className = 'db-report';
-            dbReport.innerHTML = `
-                📊 <b>SERVER LOG: DATA MIGRATION</b><br>
-                🤖 AI Assistant: Status info moved to server.<br>
-                🗄️ Database: private-kanza-server.db<br>
-                ✅ STATUS: Synchronized Success.<br>
-                [${time}] - Securely recorded.
-            `;
-            logs.appendChild(dbReport);
+            // Laporan Database
+            const db = document.createElement('div');
+            db.className = 'db-report';
+            db.innerHTML = `📊 <b>SERVER LOG: MIGRATION SUCCESS</b><br>Data secured on private-kanza-server.db`;
+            logs.appendChild(db);
 
-            const final = document.createElement('div');
-            final.innerHTML = 'kanza@krsh_ai_private:~$ <span class="fake-caret"></span>';
-            logs.appendChild(final);
-            logs.scrollTop = logs.scrollHeight;
+            // Munculkan kolom perintah baru
+            document.getElementById('command-area').classList.remove('hidden');
+            cmdInput.focus();
         }
     </script>
 </body>

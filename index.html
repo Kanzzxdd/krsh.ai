@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -611,7 +612,7 @@
   <!-- Player -->
   <div class="player-wrap" id="playerWrap">
     <video id="vid" loop playsinline muted
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4">
+      src="https://kanzzxdd.github.io/krsh.ai/in-another-life-Kanzzrox.mp4">
     </video>
     <div class="tap-overlay">
       <div class="tap-icon" id="tapIcon">
@@ -689,18 +690,9 @@
       <!-- Resolution -->
       <div class="section-label">Pilih Resolusi</div>
       <div class="res-row">
-        <div class="res-pill" data-res="360">
-          <span class="res-name">360p</span>
-          <span class="res-size">~48 MB</span>
-        </div>
-        <div class="res-pill selected" data-res="720">
-          <span class="res-name">720p</span>
-          <span class="res-size">~142 MB</span>
-          <span class="res-badge">HD</span>
-        </div>
-        <div class="res-pill" data-res="1080">
+        <div class="res-pill selected" data-res="1080">
           <span class="res-name">1080p</span>
-          <span class="res-size">~285 MB</span>
+          <span class="res-size">12.95 MB</span>
           <span class="res-badge">FHD</span>
         </div>
       </div>
@@ -708,7 +700,7 @@
       <!-- File info -->
       <div class="info-row">
         <span class="info-row-label">Ukuran file dipilih</span>
-        <span class="info-row-val"><span id="selectedSize">142</span> MB · 720p HD</span>
+        <span class="info-row-val"><span id="selectedSize">12.95</span> MB · 1080p FHD</span>
       </div>
 
       <!-- Actions -->
@@ -963,7 +955,7 @@
   }, {passive:true});
 
   // ── RESOLUTION ──
-  const resSizes = { '360': '48', '720': '142', '1080': '285' };
+  const resSizes = { '1080': '12.95' };
   resPills.forEach(pill => {
     pill.addEventListener('click', () => {
       resPills.forEach(p => p.classList.remove('selected'));
@@ -980,10 +972,43 @@
     toastTimeout = setTimeout(() => toast.classList.remove('show'), 2200);
   }
 
-  dlMainBtn.addEventListener('click', () => {
+  // Pengunduhan video riil otomatis menggunakan Blob
+  dlMainBtn.addEventListener('click', async () => {
     const sel = document.querySelector('.res-pill.selected');
-    const res = sel ? sel.dataset.res + 'p' : '720p';
-    showToast(`⬇ Mengunduh ${res}...`);
+    const res = sel ? sel.dataset.res + 'p' : '1080p';
+    showToast(`⬇ Mempersiapkan ${res}...`);
+
+    try {
+      // Mengambil file video aslinya secara langsung
+      const response = await fetch("https://kanzzxdd.github.io/krsh.ai/in-another-life-Kanzzrox.mp4");
+      if (!response.ok) throw new Error('Download failed');
+      
+      const blob = await response.blob();
+      const localUrl = window.URL.createObjectURL(blob);
+      
+      // Membuat element trigger download otomatis tanpa membuka tab baru
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = localUrl;
+      a.download = "in-another-life-Kanzz.rox.mp4"; // Nama file persis seperti di screenshot kamu
+      document.body.appendChild(a);
+      a.click();
+      
+      // Bersihkan URL object memory setelah memicu unduhan
+      window.URL.revokeObjectURL(localUrl);
+      document.body.removeChild(a);
+      showToast('✅ Unduhan dimulai otomatis!');
+    } catch (err) {
+      // Fallback aman jika terjadi isu CORS di beberapa browser
+      const a = document.createElement('a');
+      a.href = "https://kanzzxdd.github.io/krsh.ai/in-another-life-Kanzzrox.mp4";
+      a.download = "in-another-life-Kanzz.rox.mp4";
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('⬇ Mengunduh (Metode Cadangan)...');
+    }
   });
 
   shareBtn.addEventListener('click', () => {
@@ -1012,3 +1037,5 @@
 </script>
 </body>
 </html>
+
+```
